@@ -5,6 +5,8 @@ require "mechanize"
 require "ap"
 require "pry-byebug"
 
+require "csv"
+
 require 'active_support'
 require 'active_support/core_ext'
 
@@ -30,6 +32,17 @@ class Trademark
     @status = attributes[:status]
   end
 
+  def to_hash
+    {
+      id: id,
+      name: name,
+      segments: segments,
+      applicant: applicant,
+      applied_at: applied_at,
+      registrated_at: registrated_at,
+      status: status
+    }
+  end
 
   def self.search_by(keyword)
     elements = get_searched_elements(keyword)
@@ -67,8 +80,8 @@ class Trademark
 
     result_count = page.search(".searchbox-result-count").text.gsub("件", "").to_i
 
-    ap "----"
-    ap "検索件数: #{result_count} 件"
+    # ap "----"
+    # ap "検索件数: #{result_count} 件"
     return if result_count == 0
 
     result_page = page.form_with(:name => 'syouhyouLink').submit()
@@ -80,7 +93,7 @@ class Trademark
     elements = page.search(".table-result > tbody > tr").map do |tr|
       strip_from_elements(tr.search("td"))
     end
-    ap "#{elements.size} 件取得中..."
+    # ap "#{elements.size} 件取得中..."
     url = get_pagination_link(page)
     return elements if url.blank?
     [elements, extract_elements(@agent.get(url))].flatten
@@ -102,5 +115,17 @@ class Trademark
   end
 end
 
-ap Trademark.search_by('BMW').size
+key = "bmw"
+
+trademarks = Trademark.search_by(key)
+
+rows = trademarks.map { |tm|
+  hash = tm.to_hash
+  CSV::Row.new(hash.keys, hash.values)
+}
+table = CSV::Table.new(rows)
+
+File.open("#{key}.csv", "w") do |f|
+  f.write(table.to_csv)
+end
 
