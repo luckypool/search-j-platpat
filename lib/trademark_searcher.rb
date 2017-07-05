@@ -1,16 +1,8 @@
-#!/bin/env ruby
-# encoding: utf-8
-
 require "mechanize"
-require "ap"
-require "pry-byebug"
+require "active_support"
+require "active_support/core_ext"
 
-require "csv"
-
-require 'active_support'
-require 'active_support/core_ext'
-
-class Trademark
+class TrademarkSearcher
   attr_reader :id
   attr_reader :name
   attr_reader :segments
@@ -50,7 +42,7 @@ class Trademark
     elements.map do |e|
       self.new({
         id: e[:number],
-        name: e[:applicant],
+        name: e[:name],
         segments: e[:segments],
         applicant: e[:applicant],
         applied_at: e[:applied_at],
@@ -114,18 +106,3 @@ class Trademark
     Hash[pair_list]
   end
 end
-
-key = "bmw"
-
-trademarks = Trademark.search_by(key)
-
-rows = trademarks.map { |tm|
-  hash = tm.to_hash
-  CSV::Row.new(hash.keys, hash.values)
-}
-table = CSV::Table.new(rows)
-
-File.open("#{key}.csv", "w") do |f|
-  f.write(table.to_csv)
-end
-
