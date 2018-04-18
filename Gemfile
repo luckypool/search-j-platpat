@@ -1,8 +1,10 @@
 # A sample Gemfile
 source "https://rubygems.org"
 
-gem "awesome_print"
-gem "pry-byebug"
+group:development, :test do
+  gem "awesome_print"
+  gem "pry-byebug"
+end
 
-gem "mechanize"
+gem "mechanize", "~> 2.7.5"
 
