@@ -12,7 +12,7 @@ require "pry-byebug"
 
 options = ARGV.getopts('k:')
 key     = options["k"]
-fail "ERROR: blank key!" if key.strip == ""
+fail "ERROR: blank key!" if key.nil? || key.strip == ""
 
 trademarks = TrademarkSearcher.search_by(key) || []
 
